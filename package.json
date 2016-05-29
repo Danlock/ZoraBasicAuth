@@ -1,0 +1,22 @@
+{
+  "name": "zorabasicauth",
+  "version": "1.0.0",
+  "description": "Basic Authentication problem for Zora made with Hapi.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Danlock/ZoraBasicAuth.git"
+  },
+  "author": "Daniel Lockhart",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Danlock/ZoraBasicAuth/issues"
+  },
+  "homepage": "https://github.com/Danlock/ZoraBasicAuth#readme",
+  "dependencies": {
+    "hapi": "^13.4.1"
+  }
+}
