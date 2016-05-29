@@ -38,17 +38,7 @@ exports.register = function (server, options, next) {
             }
 
             callback(null,true,{fname: doc.fname,lname: doc.lname,email:username,password:doc.password});
-        });
-        // if (!user || password !== user.password) {
-
-        //     return callback(null, false);
-        // }
-     
-        // callback(null,true,{fname:user.fname,lname:user.lname,email:username});
-
-        // Bcrypt.compare(password, user.password, (err, isValid) => {
-        //     callback(err, isValid, [user.fname,user.lname,user.email]);
-        // });
+            });
         }
     });
 
@@ -72,7 +62,7 @@ exports.register = function (server, options, next) {
                 var index = name.indexOf(" ");
                 var fname = name.substr(0, index);
                 var lname = name.substr(index+1);
-
+                //Note, if this was production code here I would hash the plaintext password before putting it in the DB.
                 var user = {_id: uuid.v1(),fname:fname,lname:lname,name:name,password:request.payload.password,email:request.payload.email};
 
                 users.save(user, (err,result) => {
@@ -122,12 +112,21 @@ exports.register = function (server, options, next) {
                     newPass: Joi.string().min(1).max(200).required()
                 }
             },
-            auth: {strategy : 'simple'},
+            auth: {
+                strategy : 'simple'
+            },
             handler: function (request, reply) {
-                var success = reset(request.payload.oldPass,request.payload.newPass);
-
-                if (success) reply("Success").code(200);
-                else reply(Boom.unauthorized("Bad password!"))
+                users.update({
+                    email:request.auth.credentials.email,
+                    password:request.payload.oldPass
+                }, {
+                password: request.payload.newPass
+                }, (err, result) => {
+                    if (err || result.n === 0) {
+                        return reply(Boom.badData('Not found or Internal MongoDB error!', err));
+                    }
+                    reply().code(200);
+                });
             }
         }
     });
