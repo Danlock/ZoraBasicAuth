@@ -3,24 +3,6 @@
 const Bcrypt = require('bcrypt');
 const Joi = require('joi');
 const Boom = require('boom');
-const uuid = require('node-uuid');
-
-// const users = {
-//     "john@doe.com": {
-//         password: '12',   // 'secret'
-//         name: 'John Doe',
-//         fname: 'John',
-//         id: '2133d32a'
-//     }
-// };
-
-const getUser = function (email,pw) {
-
-
-
-    return [1,2,email,header];
-}
-
 
 exports.register = function (server, options, next) {
     const db = server.app.db;
@@ -60,19 +42,32 @@ exports.register = function (server, options, next) {
             handler: function (request, reply) {
                 var name = request.payload.name;
                 var index = name.indexOf(" ");
-                var fname = name.substr(0, index);
-                var lname = name.substr(index+1);
-                //Note, if this was production code here I would hash the plaintext password before putting it in the DB.
-                var user = {_id: uuid.v1(),fname:fname,lname:lname,name:name,password:request.payload.password,email:request.payload.email};
 
-                users.save(user, (err,result) => {
-                    if (err) {
-                        return reply(Boom.badData('Internal MongoDB error!', err));
+                if (index > 0) {
+                    var fname = name.substr(0, index);
+                    var lname = name.substr(index+1);
+                } else {
+                    var fname = name;
+                    var lname = "";
+                }
+                //Note, if this was production code here I would encrypt the plaintext password before putting it in the DB.
+                var user = {fname:fname,lname:lname,name:name,password:request.payload.password,email:request.payload.email};
+
+                users.findOne({email:request.payload.email}, (err,doc) => {
+                    if (err || doc) {
+                        return reply(Boom.badData('That email already exists!', err));
                     } else {
-                        reply(user);
-                    }
+                        users.save(user, (err,result) => {
+                            if (err) {
+                                return reply(Boom.badData('Internal MongoDB error!', err));
+                            } else {
+                                reply(user);
+                            }
 
+                        });
+                    }
                 });
+
             }
         }
     });

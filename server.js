@@ -9,9 +9,6 @@ const server = new Hapi.Server({ debug: { request: ['error'] } });
 server.connection({ port: 3000 });
 server.app.db = mongojs('hapi-rest-mongo'); 
 
-
-//Authentication
-
 server.register([
     Basic,
     Routes
